@@ -1,9 +1,12 @@
 import models from '../models';
+import bcrypt from 'bcryptjs';
+import token from '../services/token';
 
 export default {
     add: async (req, res, next) => {
         try {
-            const reg = await models.Categoria.create(req.body);
+            req.body.password = await bcrypt.hash(req.body.password, 10);
+            const reg = await models.Usuario.create(req.body);
             res.status(200).json(reg);
         } catch (error) {
             res.status(500).send({
@@ -14,7 +17,7 @@ export default {
     },
     query: async (req, res, next) => {
         try {
-            const reg = await models.Categoria.findOne({ _id: req.query._id });
+            const reg = await models.Usuario.findOne({ _id: req.query._id });
             if(!reg) {
                 res.status(404).send({
                     message: 'Este registro não existe!'
@@ -32,10 +35,10 @@ export default {
     list: async ( req, res, next ) => {
         try {
             let valor = req.query.valor;
-            const reg = await models.Categoria.find({ 
+            const reg = await models.Usuario.find({ 
                 $or: [
                     { 'name': new RegExp( valor, 'i' ) }, 
-                    { 'description': new RegExp( valor, 'i')}
+                    { 'email': new RegExp( valor, 'i')}
                 ]}, 
                 { createdAt: 0 })
                 .sort({ 'name': -1 });
@@ -49,7 +52,12 @@ export default {
     },
     update: async (req, res, next) => {
         try {
-            const reg = await models.Categoria.findByIdAndUpdate( { _id: req.body._id }, { name: req.body.name, description: req.body.description } );
+            let pas = req.body.password;
+            const reg0 = await models.Usuario.findOne({ _id: req.body._id});
+            if (pas != reg0.password) {
+                req.body.password = await bcrypt.hash(req.body.password, 10);
+            }
+            const reg = await models.Usuario.findByIdAndUpdate( { _id: req.body._id }, { rol: req.body.roll, name: req.body.name, document_type: req.body.document_type, document_num: req.body.document_num, direction: req.body.direction, phone: req.body.phone, email: req.body.email, password: req.body.password} );
             res.status(200).json(reg);
         } catch (error) {
             res.status(500).send({
@@ -60,7 +68,7 @@ export default {
     },
     remove: async (req, res, next) => {
         try {
-            const reg = await models.Categoria.findByIdAndDelete({ _id: req.body._id });
+            const reg = await models.Usuario.findByIdAndDelete({ _id: req.body._id });
             res.status(200).json(reg);
         } catch (error) {
             res.status(500).send({
@@ -71,7 +79,7 @@ export default {
     },
     activate: async (req, res, next) => {
         try {
-            const reg = await models.Categoria.findByIdAndUpdate({ _id: req.body._id }, { status: 1 });
+            const reg = await models.Usuario.findByIdAndUpdate({ _id: req.body._id }, { status: 1 });
             res.status(200).json(reg);
         } catch (error) {
             res.status(500).send({
@@ -82,8 +90,33 @@ export default {
     },
     deactivate: async (req, res, next) => {
         try {
-            const reg = await models.Categoria.findByIdAndUpdate({ _id: req.body._id }, { status: 0 });
+            const reg = await models.Usuario.findByIdAndUpdate({ _id: req.body._id }, { status: 0 });
             res.status(200).json(reg);
+        } catch (error) {
+            res.status(500).send({
+                message: 'Ocorreu um erro!'
+            });
+            next(error);
+        }
+    },
+    login: async (req, res, next) => {
+        try {
+            let user = await models.Usuario.findOne({ email: req.body.email, status: 1 });
+            if (user) {
+                let match = await bcrypt.compare(req.body.password, user.password);
+                if (match) {
+                    let tokenReturn = await token.encode(user._id);
+                    res.status(200).json({ user, tokenReturn });
+                } else {
+                    res.status(404).send({
+                        message: 'Senha incorreta'
+                    })
+                }
+            } else {
+                res.status(404).send({
+                    message: 'Não existe o usuário'
+                })
+            }
         } catch (error) {
             res.status(500).send({
                 message: 'Ocorreu um erro!'
