@@ -152,7 +152,7 @@ export default {
             next(error);
         }
     },
-    consultaFechas: async ( req, res, next ) => {
+    consultaDatas: async ( req, res, next ) => {
         try {
             let start = req.query.start;
             let end = req.query.end;
