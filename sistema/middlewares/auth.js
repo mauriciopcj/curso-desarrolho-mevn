@@ -30,7 +30,7 @@ export default {
             });
         }
     },
-    verifyArmazeandor: async (req, res, next) => {
+    verifyArmazenador: async (req, res, next) => {
         if (!req.headers.token) {
             return res.status(404).send({
                 message: 'Não tem token'
