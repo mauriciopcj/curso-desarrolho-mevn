@@ -3,7 +3,7 @@
     <v-flex>
       <v-data-table
         :headers="headers"
-        :items="categorias"
+        :items="artigos"
         :search="search"
         class="elevation-1"
       >    
@@ -12,7 +12,7 @@
         <template v-slot:top>
           <v-toolbar flat color="white">
 
-            <v-toolbar-title>Categorias</v-toolbar-title>
+            <v-toolbar-title>Artigos</v-toolbar-title>
             <v-divider
               class="mx-4"
               inset
@@ -36,16 +36,36 @@
                 <v-card-text>
                   <v-container>
                     <v-row>
-                      <v-col cols="12" sm="6" md="4">
+
+                      <v-col cols="12" sm="6" md="6">
+                        <v-text-field v-model="code" label="Código"></v-text-field>
+                      </v-col>
+
+                      <v-col cols="12" sm="6" md="6">
+                        <v-select v-model="category" :items="categories" label="Categoria"></v-select>
+                      </v-col>
+
+                      <v-col cols="12" sm="12" md="12">
                         <v-text-field v-model="name" label="Nome"></v-text-field>
                       </v-col>
-                      <v-col cols="12" sm="6" md="4">
+
+                      <v-col cols="12" sm="6" md="6">
+                        <v-text-field type="number" v-model="stock" label="Estoque"></v-text-field>
+                      </v-col>
+
+                      <v-col cols="12" sm="6" md="6">
+                        <v-text-field v-model="price_shell" label="Preço de Venda"></v-text-field>
+                      </v-col>
+
+                      <v-col cols="12" sm="12" md="12">
                         <v-text-field v-model="description" label="Descrição"></v-text-field>
                       </v-col>
+
                       <v-col cols="12" sm="6" md="4" v-show="validar">
                         <div class="red--text" v-for="v in validaMensagem" :key="v" v-text="v">
                         </div>
                       </v-col>
+
                     </v-row>
                   </v-container>
                 </v-card-text>
@@ -114,6 +134,10 @@
           </template>
         </template>
 
+        <template v-slot:item.category="{item}">
+          <v-text>{{ item.category }}</v-text>
+        </template>
+
         <template v-slot:item.status="{item}">
           <v-text v-if="item.status==1" class="blue--text">Ativo</v-text>
           <v-text v-if="item.status==0" class="red--text">Inativo</v-text>
@@ -139,17 +163,26 @@ export default {
     return {
       dialog: false,
       search: '',
-      categorias: [],
+      artigos: [],
       headers: [
         { text: 'Opções', value: 'action', sortable: false },
+        { text: 'Código', value: 'code', sortable: false },
         { text: 'Nome', value: 'name', sortable: true },
+        { text: 'Categoria', value: 'category.name', sortable: true },
+        { text: 'Estoque', value: 'stock', sortable: false },
+        { text: 'Preço de Venda', value: 'price_shell', sortable: false },
         { text: 'Descrição', value: 'description', sortable: false },
         { text: 'Estado', value: 'status' , sortable: false },
       ],
       editedIndex: -1,
       __id: '',
+      category: '',
+      categories: [],
+      code: '',
       name: '',
-      description:'',
+      stock: 0,
+      price_shell: 0,
+      description: '',
       valida: 0,
       validaMensagem: [],
       adModal: 0,
@@ -169,15 +202,31 @@ export default {
     },
   },
   created () {
-    this.listar()
+    this.listar();
+    this.selectCategory();
   },
   methods: {
+    selectCategory(){
+      let me = this;
+      let categoryArray = [];
+      let header = {'Token': this.$store.state.token};
+      let configuration = {headers: header};
+      axios.get('categoria/list', configuration).then(function (response){
+        categoryArray = response.data;
+        categoryArray.map(function(x){
+          me.categories.push({text: x.name, value: x._id});
+          console.log(x.name, x._id);
+        });
+      }).catch(function (error){
+        console.log(error);
+      })
+    },
     listar() {
       let me = this;
       let header = {'Token': this.$store.state.token};
       let configuration = {headers: header};
-      axios.get('categoria/list', configuration).then(function (response){
-        me.categorias = response.data;
+      axios.get('artigo/list', configuration).then(function (response){
+        me.artigos = response.data;
       }).catch(function (error){
         console.log(error);
       })
@@ -185,6 +234,9 @@ export default {
     limpar() {
       this._id = '';
       this.name = '';
+      this.code = '';
+      this.stock = 0;
+      this.price_shell = 0;
       this.description = '';
       this.valida = 0;
       this.validaMensagem = [];
@@ -193,14 +245,26 @@ export default {
     validar() {
       this.valida = 0;
       this.validaMensagem = [];
+      if(!this.category){
+        this.validaMensagem.push('Selecione uma categoria');
+      }
+      if(this.code.length > 64){
+        this.validaMensagem.push('O código não deve ter mais de 64 caracteres');
+      }
       if(this.name.length < 1 || this.name.length > 50){
-        this.validaMensagem.push('O nome da categoria deve ter entre 1-50 caracteres');
+        this.validaMensagem.push('O nome do artigo deve ter entre 1-50 caracteres');
       }
       if(this.description.length > 255){
-        this.validaMensagem.push('A descrição da categoria não deve ter mais de 255 caracteres');
+        this.validaMensagem.push('A descrição do artigo não deve ter mais de 255 caracteres');
+      }
+      if(this.stock.length < 0){
+        this.validaMensagem.push('Insira um valor de estoque válido');
+      }
+      if(this.price_shell.length < 0){
+        this.validaMensagem.push('Insira um preço de venda válido');
       }
       if(this.validaMensagem.length){
-        this.validar = 1;
+        this.valida = 1;
       }
       return this.valida;
     },
@@ -212,7 +276,15 @@ export default {
         return;
       }
       if (this.editedIndex > -1) {
-        axios.put('categoria/update', {'_id': this._id, 'name': this.name, 'description': this.description}, configuration)
+        axios.put('artigo/update', {
+          '_id': this._id, 
+          'category': this.category,
+          'code': this.code,
+          'name': this.name, 
+          'stock': this.stock,
+          'price_shell': this.price_shell,
+          'description': this.description
+        }, configuration)
         .then(function(response){
           me.limpar();
           me.close();
@@ -221,7 +293,15 @@ export default {
           console.log(error);
         });
       } else {
-        axios.post('categoria/add', {'name': this.name, 'description': this.description}, configuration)
+        axios.post('artigo/add', 
+        {
+          'category': this.category,
+          'code': this.code,
+          'name': this.name, 
+          'stock': this.stock,
+          'price_shell': this.price_shell,
+          'description': this.description
+        }, configuration)
         .then(function(response){
           me.limpar();
           me.close();
@@ -233,7 +313,11 @@ export default {
     },
     editItem (item) {
       this._id = item._id;
+      this.category = item.category;
+      this.code = item.code;
       this.name = item.name;
+      this.stock = item.stock;
+      this.price_shell = item.price_shell;
       this.description = item.description;
       this.dialog = true;
       this.editedIndex = 1;
@@ -258,7 +342,7 @@ export default {
       let me = this;
       let header = {'Token': this.$store.state.token};
       let configuration = {headers: header};
-      axios.put('categoria/activate', {'_id': this.adId}, configuration)
+      axios.put('artigo/activate', {'_id': this.adId}, configuration)
       .then(function(response){
         me.adModal = 0;
         me.adAction = 0;
@@ -273,7 +357,7 @@ export default {
       let me = this;
       let header = {'Token': this.$store.state.token};
       let configuration = {headers: header};
-      axios.put('categoria/deactivate', {'_id': this.adId}, configuration)
+      axios.put('artigo/deactivate', {'_id': this.adId}, configuration)
       .then(function(response){
         me.adModal = 0;
         me.adAction = 0;

@@ -3,7 +3,7 @@
     <v-flex>
       <v-data-table
         :headers="headers"
-        :items="categorias"
+        :items="usuarios"
         :search="search"
         class="elevation-1"
       >    
@@ -12,7 +12,7 @@
         <template v-slot:top>
           <v-toolbar flat color="white">
 
-            <v-toolbar-title>Categorias</v-toolbar-title>
+            <v-toolbar-title>Usuários</v-toolbar-title>
             <v-divider
               class="mx-4"
               inset
@@ -36,16 +36,44 @@
                 <v-card-text>
                   <v-container>
                     <v-row>
-                      <v-col cols="12" sm="6" md="4">
+
+                      <v-col cols="12" sm="6" md="6">
                         <v-text-field v-model="name" label="Nome"></v-text-field>
                       </v-col>
-                      <v-col cols="12" sm="6" md="4">
-                        <v-text-field v-model="description" label="Descrição"></v-text-field>
+
+                      <v-col cols="12" sm="6" md="6">
+                        <v-select v-model="rol" :items="rols" label="Papel"></v-select>
                       </v-col>
+
+                      <v-col cols="12" sm="6" md="6">
+                        <v-select v-model="document_type" :items="documents" label="Tipo do Documento"></v-select>
+                      </v-col>
+
+                      <v-col cols="12" sm="6" md="6">
+                        <v-text-field v-model="document_num" label="Número do Documento"></v-text-field>
+                      </v-col>
+
+                      <v-col cols="12" sm="6" md="6">
+                        <v-text-field v-model="direction" label="Direção"></v-text-field>
+                      </v-col>
+
+                      <v-col cols="12" sm="6" md="6">
+                        <v-text-field v-model="phone" label="Telefone"></v-text-field>
+                      </v-col>
+
+                      <v-col cols="12" sm="6" md="6">
+                        <v-text-field v-model="email" label="E-mail"></v-text-field>
+                      </v-col>
+
+                      <v-col cols="12" sm="6" md="6">
+                        <v-text-field type="password" v-model="password" label="Senha"></v-text-field>
+                      </v-col>
+
                       <v-col cols="12" sm="6" md="4" v-show="validar">
                         <div class="red--text" v-for="v in validaMensagem" :key="v" v-text="v">
                         </div>
                       </v-col>
+
                     </v-row>
                   </v-container>
                 </v-card-text>
@@ -139,17 +167,30 @@ export default {
     return {
       dialog: false,
       search: '',
-      categorias: [],
+      usuarios: [],
       headers: [
         { text: 'Opções', value: 'action', sortable: false },
         { text: 'Nome', value: 'name', sortable: true },
-        { text: 'Descrição', value: 'description', sortable: false },
-        { text: 'Estado', value: 'status' , sortable: false },
+        { text: 'Papel', value: 'rol', sortable: false },
+        { text: 'Tipo Documento', value: 'document_type', sortable: false },
+        { text: 'Número Documento', value: 'document_num', sortable: false },
+        { text: 'Direção', value: 'direction', sortable: false },
+        { text: 'Telefone', value: 'phone', sortable: false },
+        { text: 'E-mail', value: 'email', sortable: false },
+        { text: 'Estado', value: 'status', sortable: false },
       ],
       editedIndex: -1,
       __id: '',
       name: '',
-      description:'',
+      rol: '',
+      rols: ['Administrador', 'Armazenador', 'Vendedor'],
+      document_type: '',
+      documents: ['RG', 'CPF', 'PASSAPORTE', 'CNH'],
+      document_num: '',
+      direction: '',
+      phone: '',
+      email: '',
+      password: '',
       valida: 0,
       validaMensagem: [],
       adModal: 0,
@@ -176,16 +217,20 @@ export default {
       let me = this;
       let header = {'Token': this.$store.state.token};
       let configuration = {headers: header};
-      axios.get('categoria/list', configuration).then(function (response){
-        me.categorias = response.data;
+      axios.get('usuario/list', configuration).then(function (response){
+        me.usuarios = response.data;
       }).catch(function (error){
         console.log(error);
       })
     },
     limpar() {
       this._id = '';
-      this.name = '';
-      this.description = '';
+      this.name = ''; 
+      this.document_num = '';
+      this.direction = '';
+      this.phone = '';
+      this.email = '';
+      this.password = '';
       this.valida = 0;
       this.validaMensagem = [];
       this.editedIndex = -1;
@@ -193,14 +238,30 @@ export default {
     validar() {
       this.valida = 0;
       this.validaMensagem = [];
-      if(this.name.length < 1 || this.name.length > 50){
-        this.validaMensagem.push('O nome da categoria deve ter entre 1-50 caracteres');
+
+      if(!this.rol){
+        this.validaMensagem.push('Seleciona um papel');
       }
-      if(this.description.length > 255){
-        this.validaMensagem.push('A descrição da categoria não deve ter mais de 255 caracteres');
+      if(this.name.length < 1 || this.name.length > 50){
+        this.validaMensagem.push('O nome do usuário deve ter entre 1-50 caracteres');
+      }
+      if(this.document_num.length > 20){
+        this.validaMensagem.push('O documento não deve ter mais de 20 caracteres');
+      }
+      if(this.direction.length > 70){
+        this.validaMensagem.push('A direção não deve ter mais de 20 caracteres');
+      }
+      if(this.phone.length > 20){
+        this.validaMensagem.push('O telefone não deve ter mais de 20 caracteres');
       }
       if(this.validaMensagem.length){
         this.validar = 1;
+      }
+      if(this.email.length < 1 || this.email.length > 50){
+        this.validaMensagem.push('O email do usuário deve ter entre 1-50 caracteres');
+      }
+      if(this.password.length < 1 || this.password.length > 64){
+        this.validaMensagem.push('A senha do usuário deve ter entre 1-64 caracteres');
       }
       return this.valida;
     },
@@ -212,7 +273,17 @@ export default {
         return;
       }
       if (this.editedIndex > -1) {
-        axios.put('categoria/update', {'_id': this._id, 'name': this.name, 'description': this.description}, configuration)
+        axios.put('usuario/update', {
+            '_id': this._id, 
+            'rol': this.rol,
+            'name': this.name, 
+            'document_type': this.document_type,
+            'document_num': this.document_num,
+            'direction': this.direction,
+            'phone': this.phone,
+            'email': this.email,
+            'password': this.password
+        }, configuration)
         .then(function(response){
           me.limpar();
           me.close();
@@ -221,7 +292,17 @@ export default {
           console.log(error);
         });
       } else {
-        axios.post('categoria/add', {'name': this.name, 'description': this.description}, configuration)
+        axios.post('usuario/add', 
+        {
+            'rol': this.rol,
+            'name': this.name, 
+            'document_type': this.document_type,
+            'document_num': this.document_num,
+            'direction': this.direction,
+            'phone': this.phone,
+            'email': this.email,
+            'password': this.password
+        }, configuration)
         .then(function(response){
           me.limpar();
           me.close();
@@ -233,8 +314,14 @@ export default {
     },
     editItem (item) {
       this._id = item._id;
-      this.name = item.name;
-      this.description = item.description;
+      this.rol = item.rol,
+      this.name = item.name, 
+      this.document_type = item.document_type,
+      this.document_num = item.document_num,
+      this.direction = item.direction,
+      this.phone = item.phone,
+      this.email = item.email,
+      this.password = item.password
       this.dialog = true;
       this.editedIndex = 1;
     },
@@ -258,7 +345,7 @@ export default {
       let me = this;
       let header = {'Token': this.$store.state.token};
       let configuration = {headers: header};
-      axios.put('categoria/activate', {'_id': this.adId}, configuration)
+      axios.put('usuario/activate', {'_id': this.adId}, configuration)
       .then(function(response){
         me.adModal = 0;
         me.adAction = 0;
@@ -273,7 +360,7 @@ export default {
       let me = this;
       let header = {'Token': this.$store.state.token};
       let configuration = {headers: header};
-      axios.put('categoria/deactivate', {'_id': this.adId}, configuration)
+      axios.put('usuario/deactivate', {'_id': this.adId}, configuration)
       .then(function(response){
         me.adModal = 0;
         me.adAction = 0;

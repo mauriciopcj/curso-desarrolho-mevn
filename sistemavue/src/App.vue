@@ -4,11 +4,11 @@
     <v-navigation-drawer
       v-model="drawer"
       :clipped="$vuetify.breakpoint.lgAndUp"
-      app
+      app v-if="logado"
     >
       <v-list dense>
 
-        <template>
+        <template v-if="ehAdministrador || ehArmazenador || ehVendedor">
           <v-list-item :to="{name: 'home'}">
             <v-list-item-action>
               <v-icon>home</v-icon>
@@ -19,7 +19,7 @@
           </v-list-item>
         </template>
 
-        <template>
+        <template v-if="ehAdministrador || ehArmazenador">
           <v-list-group>
 
             <v-list-item slot="activator">
@@ -39,7 +39,7 @@
               </v-list-item-content>
             </v-list-item>
 
-            <v-list-item :to="{name: ''}">
+            <v-list-item :to="{name: 'artigo'}">
               <v-list-item-action>
                 <v-icon>table-chart</v-icon>
               </v-list-item-action>
@@ -53,7 +53,7 @@
           </v-list-group>
         </template>
 
-        <template>
+        <template v-if="ehAdministrador || ehArmazenador">
           <v-list-group>
 
             <v-list-item slot="activator">
@@ -87,7 +87,7 @@
           </v-list-group>
         </template>
 
-        <template>
+        <template v-if="ehAdministrador || ehVendedor">
           <v-list-group>
 
             <v-list-item slot="activator">
@@ -121,7 +121,7 @@
           </v-list-group>
         </template>
 
-        <template>
+        <template v-if="ehAdministrador">
           <v-list-group>
 
             <v-list-item slot="activator">
@@ -130,7 +130,7 @@
               </v-list-item-content>
             </v-list-item>
 
-            <v-list-item :to="{name: ''}">
+            <v-list-item :to="{name: 'usuario'}">
               <v-list-item-action>
                 <v-icon>table-chart</v-icon>
               </v-list-item-action>
@@ -144,7 +144,7 @@
           </v-list-group>
         </template>
 
-        <template>
+        <template v-if="ehAdministrador || ehArmazenador || ehVendedor">
           <v-list-group>
 
             <v-list-item slot="activator">
@@ -195,8 +195,11 @@
         <span class="hidden-sm-and-down">Sistema</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn icon>
-        <v-icon>logout</v-icon>
+      <v-btn icon @click="sair()" v-if="logado">
+        <v-icon>logout</v-icon> Sair
+      </v-btn>
+      <v-btn :to="{name: 'login'}" icon v-else>
+        <v-icon>apps</v-icon> Login
       </v-btn>
     </v-app-bar>
 
@@ -232,7 +235,29 @@ import HelloWorld from './components/HelloWorld';
 export default {
   name: 'App',
   data: () => ({
-    drawer: null
-  })
+    drawer: true
+  }),
+  computed: {
+    logado(){
+      return this.$store.state.usuario;
+    },
+    ehAdministrador(){
+      return this.$store.state.usuario && this.$store.state.usuario.rol == 'Administrador';
+    },
+    ehArmazenador(){
+      return this.$store.state.usuario && this.$store.state.usuario.rol == 'Armazenador';
+    },
+    ehVendedor(){
+      return this.$store.state.usuario && this.$store.state.usuario.rol == 'Vendedor';
+    }
+  },
+  created(){
+    this.$store.dispatch('autoLogin');
+  },
+  methods: {
+    sair(){
+      this.$store.dispatch('sair');
+    }
+  }
 };
 </script>
