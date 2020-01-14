@@ -96,7 +96,7 @@
               </v-list-item-content>
             </v-list-item>
 
-            <v-list-item :to="{name: ''}">
+            <v-list-item :to="{name: 'venda'}">
               <v-list-item-action>
                 <v-icon>table-chart</v-icon>
               </v-list-item-action>

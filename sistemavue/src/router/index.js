@@ -9,6 +9,7 @@ import Artigo from '../components/Artigo.vue'
 import Cliente from '../components/Cliente.vue'
 import Fornecedor from '../components/Fornecedor.vue'
 import Compra from '../components/Compra.vue'
+import Venda from '../components/Venda.vue'
 
 Vue.use(VueRouter)
 
@@ -52,6 +53,15 @@ const routes = [
     path: '/cliente',
     name: 'cliente',
     component: Cliente,
+    meta: {
+      administrador: true,
+      vendedor: true
+    }
+  },
+  {
+    path: '/venda',
+    name: 'venda',
+    component: Venda,
     meta: {
       administrador: true,
       vendedor: true

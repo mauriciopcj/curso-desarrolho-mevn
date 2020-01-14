@@ -12,6 +12,10 @@
         <template v-slot:top>
           <v-toolbar flat color="white">
 
+            <v-btn @click="criarPDF()">
+              <v-icon>print</v-icon>
+            </v-btn>
+
             <v-toolbar-title>Artigos</v-toolbar-title>
             <v-divider
               class="mx-4"
@@ -155,6 +159,8 @@
 
 <script>
 import axios from 'axios'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
 export default {
 
@@ -206,6 +212,35 @@ export default {
     this.selectCategory();
   },
   methods: {
+    criarPDF(){
+      var columns = [
+        {title: 'Nome', dataKey: 'name'},
+        {title: 'Código', dataKey: 'code'},
+        {title: 'Categoria', dataKey: 'category'},
+        {title: 'Estoque', dataKey: 'stock'},
+        {title: 'Preço de Venda', dataKey: 'price_shell'},
+      ];
+      var rows = [];
+
+      this.artigos.map(function(x){
+        rows.push(
+          {name: x.name,
+          code: x.code,
+          category: x.category.name,
+          stock: x.stock,
+          price_shell: x.price_shell}
+        );
+      });
+
+      var doc = new jsPDF('p', 'pt');
+      doc.autoTable(columns, rows, {
+        margin: {top: 60},
+        addPageContent: function(data){
+          doc.text('Lista de Artigos', 40, 30);
+        }
+      });
+      doc.save('Artigos.pdf');
+    },
     selectCategory(){
       let me = this;
       let categoryArray = [];

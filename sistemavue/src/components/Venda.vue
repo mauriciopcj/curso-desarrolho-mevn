@@ -3,7 +3,7 @@
     <v-flex>
       <v-toolbar flat color="white">
 
-        <v-toolbar-title>Compras</v-toolbar-title>
+        <v-toolbar-title>Vendas</v-toolbar-title>
         <v-divider
           class="mx-4"
           inset
@@ -108,11 +108,117 @@
             </v-card-actions>
           </v-card>
         </v-dialog>
+
+        <v-dialog v-model="comprovanteModal" max-width="1000px">
+          <v-card>
+            <v-card-title class="headline">
+              <v-btn @click="criarPDF()"><v-icon>print</v-icon></v-btn> Relatório de venda
+            </v-card-title>
+
+            <v-card-text class="">
+              <div id="factura">
+                <header>
+                  <div id="logo">
+                    <img src="img/logo2.png" id="imagen">
+                  </div>
+                  <div id="datos">
+                    <p id="encabezado">
+                      <b>IncanatoIT</b><br>José Gálvez 1368, Chongoyape - Chiclayo, Perú<br>Telefono:(+51)931742904<br>Email:jcarlos.ad7@gmail.com
+                    </p>
+                  </div>
+                  <div id="fact">
+                    <p>{{ receipt_type }}<br>
+                      {{ receipt_serie }} - {{ receipt_num }}<br>
+                      {{ data }}</p>
+                  </div>
+                </header>
+                <br>
+                <section>
+                  <div>
+                    <table id="facliente">
+                      <tbody>
+                        <tr>
+                          <td id="cliente">
+                            <strong>Sr(a). {{ person.name }}</strong><br>
+                            <strong>Documento:</strong> {{ person.document_num}}<br>
+                            <strong>Dirección:</strong> {{ person.direction }}<br>
+                            <strong>Teléfono:</strong> {{ person.phone }}<br>
+                            <strong>Email:</strong> {{ person.email }}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+                <br>
+                <section>
+                  <div>
+                    <table id="facarticulo">
+                      <thead>
+                        <tr id="fa">
+                          <th>CANT</th>
+                          <th>DESCRIPCION</th>
+                          <th>PRECIO UNIT</th>
+                          <th>DESC.</th>
+                          <th>PRECIO TOTAL</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="det in detalhes" :key="det._id">
+                          <td style="text-align:center;">{{ det.quantity }}</td>
+                          <td>{{ det.artigo }}</td>
+                          <td style="text-align:right;">{{ det.price }}</td>
+                          <td style="text-align:right;">{{ det.discount }}</td>
+                          <td style="text-align:right;">{{ (det.quantity * det.price) - det.discount }}</td>
+                        </tr>
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <th></th>
+                          <th></th>
+                          <th></th>
+                          <th style="text-align:right;">SUBTOTAL</th>
+                          <th style="text-align:right;">$ {{ totalParcial = (total - totalImposto).toFixed(2) }}</th>
+                        </tr>
+                        <tr>
+                          <th></th>
+                          <th></th>
+                          <th></th>
+                          <th style="text-align:right;">IVA ({{ tax }}%)</th>
+                          <th style="text-align:right;">$ {{ totalImposto = ((total * tax) / (1 + tax)).toFixed(2) }}</th>
+                        </tr>
+                        <tr>
+                          <th></th>
+                          <th></th>
+                          <th></th>
+                          <th style="text-align:right;">TOTAL</th>
+                          <th style="text-align:right;">$ {{ total = calcularTotal }}</th>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                </section>
+                <br>
+                <br>
+                <footer>
+                  <div id="gracias">
+                    <p><b>Gracias por su compra!</b></p>
+                  </div>
+                </footer>
+              </div>
+            </v-card-text>
+
+            <v-card-actions class="">
+              <v-btn @click="ocultarComprovante" color="blue darken-1" text>Cancelar</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+
       </v-toolbar>
       
       <v-data-table
         :headers="headers"
-        :items="compras"
+        :items="vendas"
         :search="search"
         class="elevation-1"
         v-if="verNovo==0"
@@ -121,6 +227,9 @@
 
           <v-icon small class="mr-2" @click="verCompra(item)">
             tab
+          </v-icon>
+          <v-icon small class="mr-2" @click="mostrarComprovante(item)">
+            print
           </v-icon>
           <template v-if="item.status">
             <v-icon
@@ -175,7 +284,7 @@
             </v-text-field>
           </v-flex>
           <v-flex xs12 sm8 md8 lg8 xl8>
-            <v-autocomplete :items="persons" v-model="person" label="Fornecedor">
+            <v-autocomplete :items="persons" v-model="person" label="Cliente">
             </v-autocomplete>
           </v-flex>
           <v-flex xs12 sm4 md4 lg4 xl4>
@@ -218,8 +327,11 @@
                 <template v-slot:item.quantity="{item}">
                   <v-text-field v-model="item.quantity" type="number">{{item.quantity}}</v-text-field>
                 </template>
+                <template v-slot:item.discount="{item}">
+                  <v-text-field v-model="item.discount" type="number">{{item.discount}}</v-text-field>
+                </template>
                 <template v-slot:item.total="{item}">
-                  $ {{ item.quantity * item.price }}
+                  $ {{ (item.quantity * item.price) - item.discount }}
                 </template>
 
                 <template slot="no-data">
@@ -260,6 +372,8 @@
 
 <script>
 import axios from 'axios'
+import jsPDF from 'jspdf'
+import html2canvas from 'html2canvas'
 
 export default {
 
@@ -268,11 +382,11 @@ export default {
     return {
       dialog: false,
       search: '',
-      compras: [],
+      vendas: [],
       headers: [
         { text: 'Opções', value: 'action', sortable: false },
         { text: 'Usuário', value: 'user', sortable: true },
-        { text: 'Fornecedor', value: 'person', sortable: true },
+        { text: 'Cliente', value: 'person', sortable: true },
         { text: 'Tipo do Comprovante', value: 'receipt_type', sortable: true },
         { text: 'Serie do Comprovante', value: 'receipt_serie', sortable: false },
         { text: 'Número do Comprovante', value: 'receipt_num', sortable: false },
@@ -295,6 +409,7 @@ export default {
         { text: 'Artigo', value: 'article', sortable: false },
         { text: 'Quantidade', value: 'quantity', sortable: false },
         { text: 'Preço', value: 'price', sortable: false },
+        { text: 'Desconto', value: 'discount', sortable: false },
         { text: 'Sub Total', value: 'total', sortable: false },
       ],
       detalhes: [],
@@ -321,15 +436,18 @@ export default {
       adModal: 0,
       adAction: 0,
       adName: '',
-      adId: ''
+      adId: '',
+      comprovanteModal: 0,
+      data: null
     }
   },
   computed: {
     calcularTotal: function() {
       let resultado = 0.0;
       this.detalhes.forEach(element => {
-        resultado = resultado + (element.quantity * element.price);
+        resultado = resultado + ((element.quantity * element.price) - element.discount);
       });
+      console.log(resultado);
       return resultado;
     }
   },
@@ -343,12 +461,51 @@ export default {
     this.selecionarPessoa();
   },
   methods: {
+    criarPDF(){
+      var quotes = document.getElementById('factura');
+      html2canvas(quotes).then(function(canvas){
+        var imgData = canvas.toDataURL('image/png');
+        var imgWidth = 210;
+        var pageHeight = 295;
+
+        var imgHeight = canvas.height * imgWidth / canvas.width;
+        var heightLeft = imgHeight;
+
+        var doc = new jsPDF('p', 'mm', 'a4');
+        var position = 0;
+
+        doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+
+        while(heightLeft >= 0){
+          position = heightLeft - imgHeight;
+          doc.addPage();
+          doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+        }
+        doc.save('Comprovante.pdf');
+      })
+    },
+    mostrarComprovante(item){
+      this.limpar();
+      this.receipt_type = item.receipt_type;
+      this.receipt_serie = item.receipt_serie;
+      this.receipt_num = item.receipt_num;
+      this.data = item.createdAt;
+      this.person = item.person;
+      this.tax = item.tax;
+      this.listarDetalhes(item._id);
+      this.comprovanteModal = 1;
+    },
+    ocultarComprovante(){
+      this.comprovanteModal = 0;
+    },
     selecionarPessoa(){
       let me = this;
       let personArray = [];
       let header = {'Token': this.$store.state.token};
       let configuration = {headers: header};
-      axios.get('pessoa/listFornecedores', configuration).then(function (response){
+      axios.get('pessoa/listClientes', configuration).then(function (response){
         personArray = response.data;
         personArray.map(function(x){
           me.persons.push({text: x.name, value: x._id});
@@ -378,7 +535,8 @@ export default {
             _id: data._id,
             article: data.name,
             quantity: 1,
-            price: data.price_shell
+            price: data.price_shell,
+            discount: 0
           }
         );
         this.code = '';
@@ -416,7 +574,7 @@ export default {
       let me = this;
       let header = {'Token': this.$store.state.token};
       let configuration = {headers: header};
-      axios.get('compra/query?_id=' + id, configuration).then(function (response){
+      axios.get('venda/query?_id=' + id, configuration).then(function (response){
         me.detalhes = response.data.details;
       }).catch(function (error){
         console.log(error);
@@ -437,8 +595,8 @@ export default {
       let me = this;
       let header = {'Token': this.$store.state.token};
       let configuration = {headers: header};
-      axios.get('compra/list', configuration).then(function (response){
-        me.compras = response.data;
+      axios.get('venda/list', configuration).then(function (response){
+        me.vendas = response.data;
       }).catch(function (error){
         console.log(error);
       })
@@ -464,7 +622,7 @@ export default {
       this.validaMensagem = [];
 
       if(!this.person){
-        this.validaMensagem.push('Seleciona um Fornecedor');
+        this.validaMensagem.push('Seleciona um Cliente');
       }
       if(!this.receipt_type){
         this.validaMensagem.push('Selecione um tipo de comprovante');
@@ -499,7 +657,7 @@ export default {
       }
       // Código para salvar
       console.log(this.$store.state.usuario._id);
-      axios.post('compra/add', 
+      axios.post('venda/add', 
       {
           'person': this.person,
           'user': this.$store.state.usuario._id,
@@ -538,7 +696,7 @@ export default {
       let me = this;
       let header = {'Token': this.$store.state.token};
       let configuration = {headers: header};
-      axios.put('compra/activate', {'_id': this.adId}, configuration)
+      axios.put('venda/activate', {'_id': this.adId}, configuration)
       .then(function(response){
         me.adModal = 0;
         me.adAction = 0;
@@ -553,7 +711,7 @@ export default {
       let me = this;
       let header = {'Token': this.$store.state.token};
       let configuration = {headers: header};
-      axios.put('compra/deactivate', {'_id': this.adId}, configuration)
+      axios.put('venda/deactivate', {'_id': this.adId}, configuration)
       .then(function(response){
         me.adModal = 0;
         me.adAction = 0;
@@ -572,5 +730,78 @@ export default {
 </script>
 
 <style>
+#factura {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    font-size: 16px ;
+}
 
+#logo {
+    float: left;
+    margin-left: 2%;
+    margin-right: 2%;
+}
+#imagen {
+    width: 100px;
+}
+
+#fact {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+}   
+
+#datos {
+    float: left;
+    margin-top: 0%;
+    margin-left: 2%;
+    margin-right: 2%;
+    /*text-align: justify;*/
+}
+
+#encabezado {
+    text-align: center;
+    margin-left: 10px;
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+section {
+    clear: left;
+}
+
+#cliente {
+    text-align: left;
+}
+
+#facliente {
+    width: 40%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    margin-bottom: 15px;
+}
+
+#fa {
+    color: #FFFFFF;
+    font-size: 14px;
+}
+
+#facarticulo {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    padding: 20px;
+    margin-bottom: 15px;
+}
+
+#facarticulo thead {
+    padding: 20px;
+    background: #2183E3;
+    text-align: center;
+    border-bottom: 1px solid #FFFFFF;
+}
+
+#gracias {
+    text-align: center;
+}
 </style>
