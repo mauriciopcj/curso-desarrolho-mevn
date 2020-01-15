@@ -139,11 +139,11 @@
                       <tbody>
                         <tr>
                           <td id="cliente">
-                            <strong>Sr(a). {{ person.name }}</strong><br>
-                            <strong>Documento:</strong> {{ person.document_num}}<br>
-                            <strong>Dirección:</strong> {{ person.direction }}<br>
-                            <strong>Teléfono:</strong> {{ person.phone }}<br>
-                            <strong>Email:</strong> {{ person.email }}
+                            <strong>Sr(a). {{ person }}</strong><br>
+                            <strong>Documento:</strong> {{ person}}<br>
+                            <strong>Dirección:</strong> {{ person }}<br>
+                            <strong>Teléfono:</strong> {{ person }}<br>
+                            <strong>Email:</strong> {{ person }}
                           </td>
                         </tr>
                       </tbody>
