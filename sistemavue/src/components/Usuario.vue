@@ -326,7 +326,6 @@ export default {
       this.editedIndex = 1;
     },
     ativarDesativarMostrar(action, item) {
-      console.log(item);
       this.adModal = 1;
       this.adName = item.name;
       this.adId = item._id;

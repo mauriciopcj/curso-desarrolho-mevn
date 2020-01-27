@@ -447,7 +447,6 @@ export default {
       this.detalhes.forEach(element => {
         resultado = resultado + ((element.quantity * element.price) - element.discount);
       });
-      console.log(resultado);
       return resultado;
     }
   },
@@ -656,7 +655,6 @@ export default {
         return;
       }
       // Código para salvar
-      console.log(this.$store.state.usuario._id);
       axios.post('venda/add', 
       {
           'person': this.person,
@@ -677,7 +675,6 @@ export default {
       });
     },
     ativarDesativarMostrar(action, item) {
-      console.log(item);
       this.adModal = 1;
       this.adName = item.receipt_num;
       this.adId = item._id;

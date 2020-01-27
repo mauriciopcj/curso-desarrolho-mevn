@@ -176,7 +176,7 @@ export default {
       name: '',
       person_type: 'Fornecedor',
       document_type: '',
-      documents: ['RG', 'CPF', 'PASSAPORTE', 'CNH'],
+      documents: ['RG', 'CPF', 'PASSAPORTE', 'CNH', 'CNPJ'],
       document_num: '',
       direction: '',
       phone: '',
@@ -307,7 +307,6 @@ export default {
       this.editedIndex = 1;
     },
     ativarDesativarMostrar(action, item) {
-      console.log(item);
       this.adModal = 1;
       this.adName = item.name;
       this.adId = item._id;

@@ -250,7 +250,6 @@ export default {
         categoryArray = response.data;
         categoryArray.map(function(x){
           me.categories.push({text: x.name, value: x._id});
-          console.log(x.name, x._id);
         });
       }).catch(function (error){
         console.log(error);
@@ -358,7 +357,6 @@ export default {
       this.editedIndex = 1;
     },
     ativarDesativarMostrar(action, item) {
-      console.log(item);
       this.adModal = 1;
       this.adName = item.name;
       this.adId = item._id;

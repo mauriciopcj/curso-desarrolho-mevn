@@ -141,11 +141,11 @@
         </template>
 
         <template v-slot:item.user="{item}">
-          <v-text>{{ item.user }}</v-text>
+          <v-text>{{ item.user.name }}</v-text>
         </template>
 
         <template v-slot:item.person="{item}">
-          <v-text>{{ item.person }}</v-text>
+          <v-text>{{ item.person.name }}</v-text>
         </template>
 
         <template v-slot:item.status="{item}">
@@ -498,7 +498,6 @@ export default {
         return;
       }
       // Código para salvar
-      console.log(this.$store.state.usuario._id);
       axios.post('compra/add', 
       {
           'person': this.person,
@@ -519,7 +518,6 @@ export default {
       });
     },
     ativarDesativarMostrar(action, item) {
-      console.log(item);
       this.adModal = 1;
       this.adName = item.receipt_num;
       this.adId = item._id;

@@ -50,7 +50,6 @@ export default {
                 this.$router.push({name: 'home'});
             })
             .catch(error => {
-                // console.log(error);
                 this.errorM = null;
                 if (error.response.status == 404){
                     this.errorM = 'Não existe usuário ou os dados estão incorretos';
