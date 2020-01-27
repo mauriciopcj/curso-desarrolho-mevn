@@ -72,7 +72,7 @@ export default {
             const reg = await models.Artigo.findByIdAndUpdate( 
                 { _id: req.body._id }, 
                 { 
-                    category: req.body.categoria, 
+                    category: req.body.category, 
                     code: req.body.code, 
                     name: req.body.name, 
                     description: req.body.description, 

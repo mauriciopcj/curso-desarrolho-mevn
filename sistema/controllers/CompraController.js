@@ -56,8 +56,8 @@ export default {
                     { 'receipt_num': new RegExp( valor, 'i' ) }, 
                     { 'receipt_serie': new RegExp( valor, 'i')}
                 ]})
-                .populate('usuario', { name: 1 })
-                .populate('pessoa', { name: 1 })
+                .populate('user', { name: 1 })
+                .populate('person', { name: 1 })
                 .sort({ 'createdAt': -1 });
             res.status(200).json(reg);
         } catch (error) {
