@@ -1,37 +1,26 @@
 <template>
   <v-layout align-start>
     <v-flex>
-      <v-data-table
-        :headers="headers"
-        :items="artigos"
-        :search="search"
-        class="elevation-1"
-      >    
-        
-
+      <v-data-table :headers="headers" :items="artigos" :search="search" class="elevation-1" >
         <template v-slot:top>
           <v-toolbar flat color="white">
-
             <v-btn @click="criarPDF()">
               <v-icon>print</v-icon>
             </v-btn>
 
             <v-toolbar-title>Artigos</v-toolbar-title>
-            <v-divider
-              class="mx-4"
-              inset
-              vertical
-            ></v-divider>
+
+            <v-divider class="mx-4" inset vertical ></v-divider>
             <v-spacer></v-spacer>
             
             <v-text-field class="text-xs-center" v-model="search" append-icon="search" label="Pesquisa" single-line hide-details></v-text-field>
             <v-spacer></v-spacer>
 
             <v-dialog v-model="dialog" max-width="500px">
-
               <template v-slot:activator="{ on }">
                 <v-btn color="primary" dark class="mb-2" v-on="on">Novo</v-btn>
               </template>
+
               <v-card>
                 <v-card-title>
                   <span class="headline">{{ formTitle }}</span>
@@ -40,7 +29,6 @@
                 <v-card-text>
                   <v-container>
                     <v-row>
-
                       <v-col cols="12" sm="6" md="6">
                         <v-text-field v-model="code" label="Código"></v-text-field>
                       </v-col>
@@ -69,7 +57,6 @@
                         <div class="red--text" v-for="v in validaMensagem" :key="v" v-text="v">
                         </div>
                       </v-col>
-
                     </v-row>
                   </v-container>
                 </v-card-text>
@@ -80,7 +67,6 @@
                   <v-btn color="blue darken-1" text @click="salvar">Salvar</v-btn>
                 </v-card-actions>
               </v-card>
-
             </v-dialog>
 
             <v-dialog v-model="adModal" max-width="290">
@@ -88,51 +74,45 @@
                 <v-card-title class="headline" v-if="adAction==1">
                   Ativar Item
                 </v-card-title>
+
                 <v-card-title class="headline" v-if="adAction==2">
                   Desativar Item
                 </v-card-title>
+
                 <v-card-text>
                   Estás a ponto de <span v-if="adAction==1">ativar</span><span v-if="adAction==2">desativar</span> o item {{ adName }}
                 </v-card-text>
+
                 <v-card-actions>
                   <v-spacer></v-spacer>
                   <v-btn @click="ativarDesativarCancelar()" color="green darken-1" text>
                     Cancelar
                   </v-btn>
+
                   <v-btn v-if="adAction==1" @click="ativar()" color="orange darken-4" text>
                     Ativar
                   </v-btn>
+
                   <v-btn v-if="adAction==2" @click="desativar()" color="orange darken-4" text>
                     Desativar
                   </v-btn>
                 </v-card-actions>
               </v-card>
             </v-dialog>
-
           </v-toolbar>
         </template>
 
         <template v-slot:item.action="{ item }">
-          <v-icon
-            small
-            class="mr-2"
-            @click="editItem(item)"
-          >
+          <v-icon small class="mr-2" @click="editItem(item)" >
             edit
           </v-icon>
           <template v-if="item.status">
-            <v-icon
-              small
-              @click="ativarDesativarMostrar(2, item)"
-            >
+            <v-icon small @click="ativarDesativarMostrar(2, item)" >
               block
             </v-icon>
           </template>
           <template v-else>
-            <v-icon
-              small
-              @click="ativarDesativarMostrar(1, item)"
-            >
+            <v-icon small @click="ativarDesativarMostrar(1, item)" >
               check
             </v-icon>
           </template>
@@ -150,9 +130,7 @@
         <template v-slot:no-data>
           <v-btn color="primary" @click="listar()">Recarregar</v-btn>
         </template>
-
       </v-data-table>
-
     </v-flex>
   </v-layout>
 </template>

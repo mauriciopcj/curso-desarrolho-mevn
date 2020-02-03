@@ -32,8 +32,8 @@ export default {
     query: async (req, res, next) => {
         try {
             const reg = await models.Venda.findOne({ _id: req.query._id })
-            .populate('usuario', { name: 1 })
-            .populate('pessoa', { name: 1 });
+            .populate('user', { name: 1 })
+            .populate('person', { name: 1 });
             if(!reg) {
                 res.status(404).send({
                     message: 'Este registro não existe!'
@@ -56,8 +56,8 @@ export default {
                     { 'receipt_num': new RegExp( valor, 'i' ) }, 
                     { 'receipt_serie': new RegExp( valor, 'i')}
                 ]})
-                .populate('usuario', { name: 1 })
-                .populate('pessoa', { name: 1, direction: 1, document_num: 1, phone: 1, email: 1 })
+                .populate('user', { name: 1 })
+                .populate('person', { name: 1, direction: 1, document_num: 1, phone: 1, email: 1 })
                 .sort({ 'name': -1 });
             res.status(200).json(reg);
         } catch (error) {
@@ -157,8 +157,8 @@ export default {
             let start = req.query.start;
             let end = req.query.end;
             const reg = await models.Venda.find({ "createdAt": { "$gte": start, "$lt": end }})
-            .populate('usuario', { name: 1 })
-            .populate('pessoa', { name: 1 })
+            .populate('user', { name: 1 })
+            .populate('person', { name: 1 })
             .sort({ 'createdAt': -1 });
             res.status(200).json(reg);
         } catch (error) {

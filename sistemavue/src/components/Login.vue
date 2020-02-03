@@ -1,31 +1,35 @@
 <template>
-  <v-layout align-center justify-center>
-      <v-flex xs12 sm8 md6 lg5 xl14>
-          <v-card>
-              <v-toolbar dark color="blue darken-3">
-                  <v-toolbar-title>
-                      Acesso ao Sistema
-                  </v-toolbar-title>
-              </v-toolbar>
-              <v-card-text>
-                  <v-text-field v-model="email" autofocus color="accent" label="E-mail" required>
-                  </v-text-field>
-                  <v-text-field v-model="password" type="password" color="accent" label="Senha" required>
-                  </v-text-field>
-                  <v-flex class="red--text" v-if="errorM">
-                      {{ errorM }}
-                  </v-flex>
-              </v-card-text>
-              <v-card-actions class="px-3 pb-3">
-                  <v-flex text-xs-right>
-                      <v-btn @click="entrar()" color="primary">
-                          Entrar
-                      </v-btn>
-                  </v-flex>
-              </v-card-actions>
-          </v-card>
-      </v-flex>
-  </v-layout>
+    <v-layout align-center justify-center>
+        <v-flex xs12 sm8 md6 lg5 xl14>
+            <v-card>
+                <v-toolbar dark color="blue darken-3">
+                    <v-toolbar-title>
+                        Acesso ao Sistema
+                    </v-toolbar-title>
+                </v-toolbar>
+
+                <v-card-text>
+                    <v-text-field v-model="email" autofocus color="accent" label="E-mail" required>
+                    </v-text-field>
+
+                    <v-text-field v-model="password" type="password" color="accent" label="Senha" required>
+                    </v-text-field>
+                    
+                    <v-flex class="red--text" v-if="errorM">
+                        {{ errorM }}
+                    </v-flex>
+                </v-card-text>
+
+                <v-card-actions class="px-3 pb-3">
+                    <v-flex text-xs-right>
+                        <v-btn @click="entrar()" color="primary">
+                            Entrar
+                        </v-btn>
+                    </v-flex>
+                </v-card-actions>
+            </v-card>
+        </v-flex>
+    </v-layout>
 </template>
 
 <script>

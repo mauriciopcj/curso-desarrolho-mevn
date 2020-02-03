@@ -1,10 +1,8 @@
 <template>
   <v-app id="app">
     
-    <v-navigation-drawer
-      v-model="drawer"
+    <v-navigation-drawer v-model="drawer" app v-if="logado"
       :clipped="$vuetify.breakpoint.lgAndUp"
-      app v-if="logado"
     >
       <v-list dense>
 
@@ -13,6 +11,7 @@
             <v-list-item-action>
               <v-icon>home</v-icon>
             </v-list-item-action>
+
             <v-list-item-title>
               Inicio
             </v-list-item-title>
@@ -30,8 +29,9 @@
 
             <v-list-item :to="{name: 'categoria'}">
               <v-list-item-action>
-                <v-icon>table-chart</v-icon>
+                <v-icon>table_chart</v-icon>
               </v-list-item-action>
+
               <v-list-item-content>
                 <v-list-item-title>
                   Categorias
@@ -41,8 +41,9 @@
 
             <v-list-item :to="{name: 'artigo'}">
               <v-list-item-action>
-                <v-icon>table-chart</v-icon>
+                <v-icon>table_chart</v-icon>
               </v-list-item-action>
+
               <v-list-item-content>
                 <v-list-item-title>
                   Artigos
@@ -64,8 +65,9 @@
 
             <v-list-item :to="{name: 'compra'}">
               <v-list-item-action>
-                <v-icon>table-chart</v-icon>
+                <v-icon>table_chart</v-icon>
               </v-list-item-action>
+
               <v-list-item-content>
                 <v-list-item-title>
                   Compras
@@ -75,8 +77,9 @@
 
             <v-list-item :to="{name: 'fornecedor'}">
               <v-list-item-action>
-                <v-icon>table-chart</v-icon>
+                <v-icon>table_chart</v-icon>
               </v-list-item-action>
+
               <v-list-item-content>
                 <v-list-item-title>
                   Fornecedores
@@ -98,8 +101,9 @@
 
             <v-list-item :to="{name: 'venda'}">
               <v-list-item-action>
-                <v-icon>table-chart</v-icon>
+                <v-icon>table_chart</v-icon>
               </v-list-item-action>
+
               <v-list-item-content>
                 <v-list-item-title>
                   Vendas
@@ -109,8 +113,9 @@
 
             <v-list-item :to="{name: 'cliente'}">
               <v-list-item-action>
-                <v-icon>table-chart</v-icon>
+                <v-icon>table_chart</v-icon>
               </v-list-item-action>
+
               <v-list-item-content>
                 <v-list-item-title>
                   Clientes
@@ -132,8 +137,9 @@
 
             <v-list-item :to="{name: 'usuario'}">
               <v-list-item-action>
-                <v-icon>table-chart</v-icon>
+                <v-icon>table_chart</v-icon>
               </v-list-item-action>
+
               <v-list-item-content>
                 <v-list-item-title>
                   Usuários
@@ -155,8 +161,9 @@
 
             <v-list-item :to="{name: ''}">
               <v-list-item-action>
-                <v-icon>table-chart</v-icon>
+                <v-icon>table_chart</v-icon>
               </v-list-item-action>
+
               <v-list-item-content>
                 <v-list-item-title>
                   Consulta Compras
@@ -164,10 +171,11 @@
               </v-list-item-content>
             </v-list-item>
 
-            <v-list-item :to="{name: ''}">
+            <v-list-item :to="{name: 'home'}">
               <v-list-item-action>
-                <v-icon>table-chart</v-icon>
+                <v-icon>table_chart</v-icon>
               </v-list-item-action>
+
               <v-list-item-content>
                 <v-list-item-title>
                   Consulta Vendas
@@ -181,33 +189,27 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-app-bar
-      :clipped-left="$vuetify.breakpoint.lgAndUp"
-      app
-      color="blue darken-3"
-      dark
-    >
-      <v-toolbar-title
-        style="width: 300px"
-        class="ml-0 pl-3"
-      >
+    <v-app-bar :clipped-left="$vuetify.breakpoint.lgAndUp" app color="blue darken-3" dark >
+
+      <v-toolbar-title style="width: 300px" class="ml-0 pl-3" >
         <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
         <span class="hidden-sm-and-down">Sistema</span>
       </v-toolbar-title>
+
       <v-spacer></v-spacer>
+
       <v-btn icon @click="sair()" v-if="logado">
         <v-icon>logout</v-icon> Sair
       </v-btn>
+
       <v-btn :to="{name: 'login'}" icon v-else>
         <v-icon>apps</v-icon> Login
       </v-btn>
+
     </v-app-bar>
 
     <v-content>
-      <v-container
-        fluid
-        fill-height
-      >
+      <v-container fluid fill-height >
         <v-slide-y-transition mode="out-in">
           <router-view/>
         </v-slide-y-transition>
