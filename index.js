@@ -10,7 +10,7 @@ import router from './routes';
 
 // Conexão com a base de dados MongoDB
 mongoose.Promise = global.Promise;
-const dbUrl = 'mongodb+srv://mauriciopcj:admin@dbsistema-zfiuw.mongodb.net/test?retryWrites=true&w=majority';
+const dbUrl = 'mongodb+srv://mauriciopcj:sistemavendas@mauriciopcj-zfiuw.mongodb.net/dbsistema?retryWrites=true&w=majority';
 mongoose.connect(dbUrl, { useCreateIndex: true, useNewUrlParser: true })
 .then(mongoose => console.log('Conectando a BD na porta 27017'))
 .catch(err => console.log(err));
